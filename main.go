@@ -4,23 +4,23 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/richardpanda/supreme-sniper/supreme"
+	"github.com/richardpanda/supreme-sniper/bot"
 )
 
 func main() {
-	c, err := supreme.NewClient()
+	b, err := bot.New()
 	if err != nil {
 		panic(err)
 	}
 
-	err = c.AddItem()
+	err = b.AddItem()
 	if err != nil {
 		panic(err)
 	}
 
 	time.Sleep(3 * time.Second)
 
-	numItems, err := c.NumItems()
+	numItems, err := b.NumItems()
 	if err != nil {
 		panic(err)
 	}

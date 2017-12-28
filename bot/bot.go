@@ -1,4 +1,4 @@
-package supreme
+package bot
 
 import (
 	"encoding/json"
@@ -14,7 +14,7 @@ import (
 	"golang.org/x/net/publicsuffix"
 )
 
-type Client struct {
+type Bot struct {
 	http.Client
 }
 
@@ -33,13 +33,13 @@ type config struct {
 	RVV            string `json:"rvv"`
 }
 
-func NewClient() (*Client, error) {
+func New() (*Bot, error) {
 	jar, err := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
 	if err != nil {
 		return nil, err
 	}
 
-	return &Client{http.Client{Jar: jar}}, nil
+	return &Bot{http.Client{Jar: jar}}, nil
 }
 
 func loadConfig() (*config, error) {
@@ -61,7 +61,7 @@ func setUserAgent(req *http.Request) {
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36")
 }
 
-func (c *Client) AddItem() error {
+func (b *Bot) AddItem() error {
 	u := "http://www.supremenewyork.com/shop/171001/add"
 	v := url.Values{}
 	v.Set("utf8", "✓")
@@ -75,7 +75,7 @@ func (c *Client) AddItem() error {
 	}
 
 	setUserAgent(req)
-	resp, err := c.Do(req)
+	resp, err := b.Do(req)
 	if err != nil {
 		return err
 	}
@@ -84,13 +84,13 @@ func (c *Client) AddItem() error {
 	return nil
 }
 
-func (c *Client) CheckOut() error {
+func (b *Bot) CheckOut() error {
 	cfg, err := loadConfig()
 	if err != nil {
 		return err
 	}
 
-	doc, err := c.checkoutPage()
+	doc, err := b.checkoutPage()
 	if err != nil {
 		return err
 	}
@@ -137,7 +137,7 @@ func (c *Client) CheckOut() error {
 
 	setUserAgent(req)
 	req.Header.Set("X-CSRF-TOKEN", csrfToken)
-	resp, err := c.Do(req)
+	resp, err := b.Do(req)
 	if err != nil {
 		return err
 	}
@@ -146,8 +146,8 @@ func (c *Client) CheckOut() error {
 	return nil
 }
 
-func (c *Client) checkoutPage() (*goquery.Document, error) {
-	resp, err := c.Get("https://www.supremenewyork.com/checkout")
+func (b *Bot) checkoutPage() (*goquery.Document, error) {
+	resp, err := b.Get("https://www.supremenewyork.com/checkout")
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +161,7 @@ func (c *Client) checkoutPage() (*goquery.Document, error) {
 	return doc, nil
 }
 
-func (c *Client) NumItems() (int, error) {
+func (b *Bot) NumItems() (int, error) {
 	u := "http://www.supremenewyork.com/shop/cart"
 	req, err := http.NewRequest("GET", u, nil)
 	if err != nil {
@@ -169,7 +169,7 @@ func (c *Client) NumItems() (int, error) {
 	}
 
 	setUserAgent(req)
-	resp, err := c.Do(req)
+	resp, err := b.Do(req)
 	if err != nil {
 		return 0, err
 	}
