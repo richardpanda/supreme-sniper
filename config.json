@@ -1,0 +1,14 @@
+{
+    "billing_name": "Jane Doe",
+    "email": "janedoe@gmail.com",
+    "tel": "111-111-1111",
+    "billing_address": "123 Fake Street",
+    "billing_zip": "12345",
+    "billing_city": "San Francisco",
+    "billing_state": "CA",
+    "billing_country": "USA",
+    "nlb": "1234 5678 1234 5678",
+    "month": "01",
+    "year": "2018",
+    "rvv": "253"
+}

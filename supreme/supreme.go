@@ -1,6 +1,9 @@
 package supreme
 
 import (
+	"encoding/json"
+	"errors"
+	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -15,6 +18,21 @@ type Client struct {
 	http.Client
 }
 
+type config struct {
+	BillingName    string `json:"billing_name"`
+	Email          string `json:"email"`
+	Tel            string `json:"tel"`
+	BillingAddress string `json:"billing_address"`
+	BillingZip     string `json:"billing_zip"`
+	BillingCity    string `json:"billing_city"`
+	BillingState   string `json:"billing_state"`
+	BillingCountry string `json:"billing_country"`
+	NLB            string `json:"nlb"`
+	Month          string `json:"month"`
+	Year           string `json:"year"`
+	RVV            string `json:"rvv"`
+}
+
 func NewClient() (*Client, error) {
 	jar, err := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
 	if err != nil {
@@ -22,6 +40,21 @@ func NewClient() (*Client, error) {
 	}
 
 	return &Client{http.Client{Jar: jar}}, nil
+}
+
+func loadConfig() (*config, error) {
+	b, err := ioutil.ReadFile("config.json")
+	if err != nil {
+		return nil, err
+	}
+
+	var cfg config
+	err = json.Unmarshal(b, &cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	return &cfg, nil
 }
 
 func setUserAgent(req *http.Request) {
@@ -49,6 +82,83 @@ func (c *Client) AddItem() error {
 	defer resp.Body.Close()
 
 	return nil
+}
+
+func (c *Client) CheckOut() error {
+	cfg, err := loadConfig()
+	if err != nil {
+		return err
+	}
+
+	doc, err := c.checkoutPage()
+	if err != nil {
+		return err
+	}
+
+	asec, ok := doc.Find("#asec").Attr("value")
+	if !ok {
+		return errors.New("could not find asec")
+	}
+
+	csrfToken, ok := doc.Find("meta[name='csrf-token']").Attr("content")
+	if !ok {
+		return errors.New("could not find csrf token")
+	}
+
+	u := "https://www.supremenewyork.com/checkout.json"
+	v := url.Values{}
+	v.Set("utf8", "✓")
+	v.Set("authenticity_token", csrfToken)
+	v.Set("order[billing_name]", cfg.BillingName)
+	v.Set("order[email]", cfg.Email)
+	v.Set("order[tel]", cfg.Tel)
+	v.Set("order[billing_address]", cfg.BillingAddress)
+	v.Set("order[billing_address_2]", "")
+	v.Set("order[billing_zip]", cfg.BillingZip)
+	v.Set("order[billing_city]", cfg.BillingCity)
+	v.Set("order[billing_state]", cfg.BillingState)
+	v.Set("order[billing_country]", cfg.BillingCountry)
+	v.Set("asec", asec)
+	v.Set("same_as_billing_address", "1")
+	v.Set("store_credit_id", "")
+	v.Set("credit_card[nlb]", cfg.NLB)
+	v.Set("credit_card[month]", cfg.Month)
+	v.Set("credit_card[year]", cfg.Year)
+	v.Set("credit_card[rvv]", cfg.RVV)
+	v.Set("order[terms]", "0")
+	v.Set("order[terms]", "1")
+	v.Set("g-recaptcha-response", "")
+	v.Set("credit_card[vval]", "")
+
+	req, err := http.NewRequest("POST", u, strings.NewReader(v.Encode()))
+	if err != nil {
+		return err
+	}
+
+	setUserAgent(req)
+	req.Header.Set("X-CSRF-TOKEN", csrfToken)
+	resp, err := c.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	return nil
+}
+
+func (c *Client) checkoutPage() (*goquery.Document, error) {
+	resp, err := c.Get("https://www.supremenewyork.com/checkout")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	doc, err := goquery.NewDocumentFromResponse(resp)
+	if err != nil {
+		return nil, err
+	}
+
+	return doc, nil
 }
 
 func (c *Client) NumItems() (int, error) {
