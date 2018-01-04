@@ -91,6 +91,11 @@ const sleep = ms => new Promise((resolve, reject) => (
   await rc.changeToAudioTest();
   await page.waitFor(300);
 
+  while (await rc.isWordTest()) {
+    await rc.reloadChallenge();
+    await page.waitFor(300);
+  }
+
   do {
     await rc.downloadAudio();
     await page.waitFor(2000);
@@ -101,10 +106,7 @@ const sleep = ms => new Promise((resolve, reject) => (
       model: 'en-US_NarrowbandModel',
     };
     const t = await w.recognize(params);
-
-    const solution = await rc.isNumberTest()
-      ? transcript.toIntString(t)
-      : transcript.toString(t);
+    const solution = transcript.toIntString(t);
     console.log(solution);
 
     await rc.playAudio();

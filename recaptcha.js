@@ -39,9 +39,18 @@ class ReCaptcha {
     return !(await this.isOpen());
   }
 
+  async isWordTest() {
+    return !(await this.isNumberTest());
+  }
+
   async playAudio() {
     const playButton = await this._frame.$('.rc-button-default');
     await playButton.click();
+  }
+
+  async reloadChallenge() {
+    const reloadButton = await this._frame.$('#recaptcha-reload-button');
+    await reloadButton.click();
   }
 
   async typeSolution(solution) {
