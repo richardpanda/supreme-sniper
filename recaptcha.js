@@ -1,3 +1,9 @@
+const fs = require('fs');
+
+const audio = require('./audio');
+const transcript = require('./transcript');
+const watson = require('./watson');
+
 class ReCaptcha {
   constructor(page) {
     this._page = page;
@@ -51,6 +57,45 @@ class ReCaptcha {
   async reloadChallenge() {
     const reloadButton = await this._frame.$('#recaptcha-reload-button');
     await reloadButton.click();
+  }
+
+  async solve() {
+    if (await this.isNotOpen()) {
+      await this._page.waitFor(1000);
+      return;
+    }
+
+    await this.changeToAudioTest();
+    await this._page.waitFor(300);
+
+    while (await this.isWordTest()) {
+      await this.reloadChallenge();
+      await this._page.waitFor(300);
+    }
+
+    do {
+      await this.downloadAudio();
+      await this._page.waitFor(2000);
+
+      const params = {
+        audio: fs.createReadStream(audio.findLatestPath()),
+        content_type: 'audio/mp3',
+        model: 'en-US_NarrowbandModel',
+      };
+      const t = await watson.recognize(params);
+      const solution = transcript.toIntString(t);
+      console.log(solution);
+
+      await this.playAudio();
+      await this._page.waitFor(15000);
+        
+      await this.typeSolution(solution);
+      await this._page.waitFor(2000);
+      
+      await this.verify();
+      await this._page.waitFor(3000);
+
+    } while (await this.isOpen());
   }
 
   async typeSolution(solution) {

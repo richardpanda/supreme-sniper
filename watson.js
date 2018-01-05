@@ -1,23 +1,16 @@
 const SpeechToTextV1 = require('watson-developer-cloud/speech-to-text/v1');
 
-class Watson {
-  constructor(username, password) {
-    this._speechToText = new SpeechToTextV1({
-      username,
-      password,
-    });
-  }
+const username = process.env.SUPREME_SNIPER__WATSON__USERNAME;
+const password = process.env.SUPREME_SNIPER__WATSON__PASSWORD;
+const speechToText = new SpeechToTextV1({ username, password });
 
-  async recognize(params) {
-    return new Promise((resolve, reject) => {
-      this._speechToText.recognize(params, (err, transcript) => {
-        if (err) {
-          reject(err);
-        }
-        resolve(transcript);
-      });
-    });
-  }
-}
-
-module.exports = Watson;
+module.exports.recognize = async (params) => (
+  new Promise((resolve, reject) => {
+    speechToText.recognize(params, (err, transcript) => {
+      if (err) {
+        reject(err);
+      }
+      resolve(transcript);
+    })
+  })
+);
