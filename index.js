@@ -56,9 +56,7 @@ const sleep = ms => new Promise((resolve, reject) => (
   await sleep(1000);
 
   const c = new Checkout(config, page);
-  await c.populateForm();
-  await c.clickCheckbox();
-  await c.clickProcessPayment();
+  await c.complete();
 
   await page.waitFor(300);
 

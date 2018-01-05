@@ -12,6 +12,12 @@ class Checkout {
     await this._page.click('input[name="commit"]');
   }
 
+  async complete() {
+    await this.populateForm();
+    await this.clickCheckbox();
+    await this.clickProcessPayment();
+  }
+
   async populateForm() {
     const c = this._cfg;
     const p = this._page;
