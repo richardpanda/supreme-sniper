@@ -32,7 +32,7 @@ class Clothing {
   }
 
   sizeCode(size) {
-    return this._s[size];
+    return this._s.get(size.toLowerCase());
   }
 
   static get urlRegex() {
