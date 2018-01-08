@@ -68,12 +68,12 @@ class ReCaptcha {
     await this.changeToAudioTest();
     await this._page.waitFor(300);
 
-    while (await this.isWordTest()) {
-      await this.reloadChallenge();
-      await this._page.waitFor(300);
-    }
-
     do {
+      while (await this.isWordTest()) {
+        await this.reloadChallenge();
+        await this._page.waitFor(300);
+      }
+
       await this.downloadAudio();
       await this._page.waitFor(2000);
 
