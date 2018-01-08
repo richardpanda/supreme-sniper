@@ -1,7 +1,7 @@
 class Checkout {
-  constructor(config, page) {
+  constructor(info, page) {
+    this._info = info;
     this._page = page;
-    this._cfg = config;
   }
 
   async clickCheckbox() {
@@ -19,38 +19,38 @@ class Checkout {
   }
 
   async populateForm() {
-    const c = this._cfg;
-    const p = this._page;
+    const info = this._info;
+    const page = this._page;
 
-    const billingNameInput = await p.$('input#order_billing_name');
-    await billingNameInput.type(c.billingName);
+    const billingNameInput = await page.$('input#order_billing_name');
+    await billingNameInput.type(info.billingName);
 
-    const emailInput = await p.$('input#order_email');
-    await emailInput.type(c.email);
+    const emailInput = await page.$('input#order_email');
+    await emailInput.type(info.email);
 
-    const telInput = await p.$('input#order_tel');
-    await telInput.type(c.tel);
+    const telInput = await page.$('input#order_tel');
+    await telInput.type(info.tel);
 
-    const billingAddressInput = await p.$('input#bo');
-    await billingAddressInput.type(c.billingAddress);
+    const billingAddressInput = await page.$('input#bo');
+    await billingAddressInput.type(info.billingAddress);
 
-    const billingZipInput = await p.$('input#order_billing_zip');
-    await billingZipInput.type(c.billingZip);
+    const billingZipInput = await page.$('input#order_billing_zip');
+    await billingZipInput.type(info.billingZip);
 
-    const billingCityInput = await p.$('input#order_billing_city');
-    await billingCityInput.type(c.billingCity);
+    const billingCityInput = await page.$('input#order_billing_city');
+    await billingCityInput.type(info.billingCity);
 
-    await p.select('select#order_billing_state', c.billingState);
-    await p.select('select#order_billing_country', c.billingCountry);
+    await page.select('select#order_billing_state', info.billingState);
+    await page.select('select#order_billing_country', info.billingCountry);
 
-    const nlbInput = await p.$('input#nnaerb');
-    await nlbInput.type(c.nlb);
+    const nlbInput = await page.$('input#nnaerb');
+    await nlbInput.type(info.nlb);
 
-    await p.select('select#credit_card_month', c.month);
-    await p.select('select#credit_card_year', c.year);
+    await page.select('select#credit_card_month', info.month);
+    await page.select('select#credit_card_year', info.year);
 
-    const cvvInput = await p.$('input#orcer');
-    await cvvInput.type(c.cvv);
+    const cvvInput = await page.$('input#orcer');
+    await cvvInput.type(info.cvv);
   }
 }
 

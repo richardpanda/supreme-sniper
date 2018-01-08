@@ -4,7 +4,7 @@ const puppeteer = require('puppeteer');
 const rp = require('request-promise');
 
 const Checkout = require('./checkout');
-const config = require('./config');
+const info = require('./info');
 const order = require('./order');
 const ReCaptcha = require('./recaptcha');
 const Shop = require('./shop');
@@ -58,7 +58,7 @@ const sleep = ms => new Promise((resolve, reject) => (
 
   await sleep(1000);
 
-  const c = new Checkout(config, page);
+  const c = new Checkout(info, page);
   await c.complete();
 
   await page.waitFor(300);
