@@ -1,42 +1,30 @@
 require('dotenv').config();
 
 const puppeteer = require('puppeteer');
-const rp = require('request-promise');
 
 const Checkout = require('./checkout');
 const info = require('./info');
-const order = require('./order');
+const Inventory = require('./inventory');
+const myOrder = require('./my-order.json');
 const ReCaptcha = require('./recaptcha');
-const Shop = require('./shop');
-
-const jar = rp.jar();
-const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36';
-const request = rp.defaults({
-  followAllRedirects: true,
-  headers: {
-    'User-Agent': userAgent,
-  },
-  jar,
-  resolveWithFullResponse: true,
-});
+const Supreme = require('./supreme');
 
 const sleep = ms => new Promise((resolve, reject) => (
   setTimeout(() => resolve(), ms)
 ));
 
 (async () => {
-  const shop = new Shop();
-  // const clothing = await shop.fetchNewClothing();
-  const clothing = await shop.fetchClothingFromAccessories();
-  const pendingClothing = order.toPendingClothing(clothing);
+  const supreme = new Supreme();
+  const htmlDocs = supreme.fetchNewClothingHtmlDocs();
+  const inventory = new Inventory(htmlDocs);
+  const pendingClothing = inventory.toPendingClothing(myOrder);
 
   if (pendingClothing.length === 0) {
     console.log('Unable to find clothing in order.');
     return;
   }
 
-  await shop.add(pendingClothing);
-
+  await supreme.addPendingClothing(pendingClothing);
   await sleep(1000);
 
   const { cookies } = shop.jar._jar.toJSON();
@@ -58,11 +46,11 @@ const sleep = ms => new Promise((resolve, reject) => (
 
   await sleep(1000);
 
-  const c = new Checkout(info, page);
-  await c.complete();
+  const checkout = new Checkout(info, page);
+  await checkout.complete();
 
   await page.waitFor(300);
 
-  const rc = new ReCaptcha(page);
-  rc.solve();
+  const recaptcha = new ReCaptcha(page);
+  recaptcha.solve();
 })();
