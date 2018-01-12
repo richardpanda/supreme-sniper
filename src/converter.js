@@ -9,7 +9,7 @@ const {
   seven,
   eight,
   nine,
-} = require('./phonetic-mapping.json');
+} = require('../config/phonetic-mapping');
 
 module.exports.textToNum = (t) => {
   if (zero.includes(t)) {

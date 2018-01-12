@@ -3,11 +3,12 @@ require('dotenv').config();
 const puppeteer = require('puppeteer');
 
 const Checkout = require('./checkout');
-const info = require('./info');
 const Inventory = require('./inventory');
-const myOrder = require('./my-order.json');
 const ReCaptcha = require('./recaptcha');
 const Supreme = require('./supreme');
+
+const info = require('../config/info')
+const myOrder = require('../config/my-order');
 
 const sleep = ms => new Promise((resolve, reject) => (
   setTimeout(() => resolve(), ms)
