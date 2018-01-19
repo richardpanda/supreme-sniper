@@ -55,6 +55,11 @@ class Supreme {
       throw err;
     }
   }
+
+  getSession() {
+    const { cookies } = this._jar._jar.toJSON();
+    return cookies.find(({ key }) => key === '_supreme_sess' );
+  }
 }
 
 module.exports = Supreme;

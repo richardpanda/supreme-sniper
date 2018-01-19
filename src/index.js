@@ -28,18 +28,16 @@ const sleep = ms => new Promise((resolve, reject) => (
   await supreme.addPendingClothing(pendingClothing);
   await sleep(1000);
 
-  const { cookies } = shop.jar._jar.toJSON();
-  const supremeSession = cookies.find(({ key }) => key === '_supreme_sess' );
-
+  const session = supreme.getSession();
   const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
   await page.setCookie({
-    name: supremeSession.key,
-    value: supremeSession.value,
+    name: session.key,
+    value: session.value,
     domain: '.supremenewyork.com',
-    path: supremeSession.path,
-    expires: new Date(supremeSession.expires).getTime() / 1000,
-    httpOnly: supremeSession.httpOnly,
+    path: session.path,
+    expires: new Date(session.expires).getTime() / 1000,
+    httpOnly: session.httpOnly,
   });
   await page.setJavaScriptEnabled(true);
   await page.goto('http://www.supremenewyork.com/shop/cart');
@@ -53,5 +51,5 @@ const sleep = ms => new Promise((resolve, reject) => (
   await page.waitFor(300);
 
   const recaptcha = new ReCaptcha(page);
-  recaptcha.solve();
+  await recaptcha.solve();
 })();
