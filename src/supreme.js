@@ -18,10 +18,6 @@ class Supreme {
     });
   }
 
-  get jar() {
-    return this._jar;
-  }
-
   async addPendingClothing(pendingClothing) {
     for (let { uri, st, s } of pendingClothing) {
       await this._request({
