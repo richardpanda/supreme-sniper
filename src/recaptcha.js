@@ -68,6 +68,11 @@ class ReCaptcha {
     await this.changeToAudioTest();
     await this._page.waitFor(300);
 
+    const downloadPath = __dirname.match(/^\/Users\/\w+/g)[0] + '/Downloads';
+    let numAudioFiles = fs.readdirSync(downloadPath)
+      .filter(fn => fn.startsWith('audio'))
+      .length;
+
     do {
       while (await this.isWordTest()) {
         await this.reloadChallenge();
@@ -77,8 +82,13 @@ class ReCaptcha {
       await this.downloadAudio();
       await this._page.waitFor(2000);
 
+      const latestAudioFilePath = numAudioFiles === 0
+        ? 'audio.mp3'
+        : `audio (${numAudioFiles}).mp3`;
+      numAudioFiles += 1;
+
       const params = {
-        audio: fs.createReadStream(audio.findLatestPath()),
+        audio: fs.createReadStream(latestAudioFilePath),
         content_type: 'audio/mp3',
         model: 'en-US_NarrowbandModel',
       };
